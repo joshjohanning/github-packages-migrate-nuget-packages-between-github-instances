@@ -2,6 +2,17 @@
 Migrate NuGet packages from one GitHub instance to another
 
 This should be able to migrate packages from GitHub Enterprise Server to GitHub.com using the `<source-host>` parameter. If GitHub.com to GitHub.com, set `<source-host>` to `github.com`.
+
+## Prerequisites
+
+1. [gh cli](https://cli.github.com) installed and logged in (`gh auth login`)
+2. Auth to read packages with gh, ie: `gh auth refresh -h github.com -s read:packages`
+2. [gpr](https://github.com/jcansdale/gpr) installed: `dotnet tool install gpr -g`
+3. Can use this to find GPR path for `<path-to-gpr>`: `find / -wholename "*tools/gpr" 2> /dev/null`
+4. `<target-pat>` must have `write:packages` scope
+
+Passing `gpr` as a parameter explicitly because sometimes `gpr` is aliased to `git pull --rebase` and that's not what we want here
+
 ## Usage
 
 ```bash
@@ -23,12 +34,6 @@ This should be able to migrate packages from GitHub Enterprise Server to GitHub.
   ghp_xyz \
   /home/codespace/.dotnet/tools/gpr
 ```
-
-## Notes
-
-- Uses [jcansdale/gpr](https://github.com/jcansdale/gpr) to do the nuget push
-- Had to delete `_rels/.rels` and `\[Content_Types\].xml` because there was somehow two copies of each file in the package and it causes `gpr` to fail when extracting/zipping the package to re-push
-- Run this to clean up your working dir: rm *.nupkg *.zip
 
 <details>
 
@@ -96,3 +101,9 @@ This should be able to migrate packages from GitHub Enterprise Server to GitHub.
     ...
     Run this to clean up your working dir: rm *.nupkg *.zip
 </details>
+
+## Notes
+
+- Uses [jcansdale/gpr](https://github.com/jcansdale/gpr) to do the nuget push
+- Had to delete `_rels/.rels` and `\[Content_Types\].xml` because there was somehow two copies of each file in the package and it causes `gpr` to fail when extracting/zipping the package to re-push
+- Run this to clean up your working dir: rm *.nupkg *.zip

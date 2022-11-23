@@ -4,13 +4,13 @@
 #
 #
 # Prereqs:
-# 1. gh cli installed and logged in
+# 1. gh cli installed and logged in (`gh auth login`)
 # 2. Auth to read packages with gh, ie: `gh auth refresh -h github.com -s read:packages`
-# 2. gpr: `dotnet tool install gpr -g`
-# 3. Can use this to find GPR path: `find / -wholename "*tools/gpr" 2> /dev/null`
+# 2. gpr installed: `dotnet tool install gpr -g` (https://github.com/jcansdale/gpr)
+# 3. Can use this to find GPR path for `<path-to-gpr>`: `find / -wholename "*tools/gpr" 2> /dev/null`
 # 4. `<target-pat>` must have `write:packages` scope
 # 
-# Passing `gpr` explicitly because sometimes `gpr` is aliased to `git pull --rebase` and that's not what we want here
+# Passing `gpr` as a parameter explicitly because sometimes `gpr` is aliased to `git pull --rebase` and that's not what we want here
 #
 
 if [ -z "$5" ]; then
