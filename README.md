@@ -1,4 +1,5 @@
-# github-packages-migrate-nuget-packages
+# Migrate NuGet Packages Between GitHub Instances
+
 Migrate NuGet packages from one GitHub instance to another
 
 This should be able to migrate packages from GitHub Enterprise Server to GitHub.com using the `<source-host>` parameter. If GitHub.com to GitHub.com, set `<source-host>` to `github.com`.
