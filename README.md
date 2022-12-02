@@ -6,8 +6,8 @@ This should be able to migrate packages from GitHub Enterprise Server to GitHub.
 
 ## Prerequisites
 
-1. [gh cli](https://cli.github.com) installed and logged in (`gh auth login`)
-2. Auth to read packages with gh, ie: `gh auth refresh -h github.com -s read:packages`
+1. [gh cli](https://cli.github.com) installed and logged in to be able to access the source GitHub instance (`gh auth login`)
+2. Auth to read packages with gh, ie: `gh auth refresh -h github.com -s read:packages` (update `-h` with source github host)
 3. [gpr](https://github.com/jcansdale/gpr) installed: `dotnet tool install gpr -g`
 4. Can use this to find GPR path for `<path-to-gpr>`: `find / -wholename "*tools/gpr" 2> /dev/null`
 5. `<target-pat>` must have `write:packages` scope
