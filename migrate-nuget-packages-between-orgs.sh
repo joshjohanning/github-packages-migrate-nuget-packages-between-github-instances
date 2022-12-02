@@ -6,10 +6,10 @@
 # Prereqs:
 # 1. gh cli installed and logged in (`gh auth login`)
 # 2. Auth to read packages with gh, ie: `gh auth refresh -h github.com -s read:packages`
-# 2. gpr installed: `dotnet tool install gpr -g` (https://github.com/jcansdale/gpr)
-# 3. Can use this to find GPR path for `<path-to-gpr>`: `find / -wholename "*tools/gpr" 2> /dev/null`
-# 4. `<target-pat>` must have `write:packages` scope
-# 5. This assumes that the target org's repo name is the same as the source.
+# 3. gpr installed: `dotnet tool install gpr -g` (https://github.com/jcansdale/gpr)
+# 4. Can use this to find GPR path for `<path-to-gpr>`: `find / -wholename "*tools/gpr" 2> /dev/null`
+# 5. `<target-pat>` must have `write:packages` scope
+# 6. This assumes that the target org's repo name is the same as the source.
 # 
 # Passing `gpr` as a parameter explicitly because sometimes `gpr` is aliased to `git pull --rebase` and that's not what we want here
 #
