@@ -108,4 +108,4 @@ Passing `gpr` as a parameter explicitly because sometimes `gpr` is aliased to `g
 
 - Uses [jcansdale/gpr](https://github.com/jcansdale/gpr) to do the nuget push
 - Had to delete `_rels/.rels` and `[Content_Types].xml` because there was somehow two copies of each file in the package and it causes `gpr` to fail when extracting/zipping the package to re-push
-- Run this to clean up your working dir: rm *.nupkg *.zip
+- Run this to clean up your working dir: `rm *.nupkg *.zip`
