@@ -6,16 +6,17 @@
 # Prereqs:
 # 1. gh cli installed and logged in (`gh auth login`)
 # 2. Auth to read packages with gh, ie: `gh auth refresh -h github.com -s read:packages`
-# 3. gpr installed: `dotnet tool install gpr -g` (https://github.com/jcansdale/gpr)
-# 4. Can use this to find GPR path for `<path-to-gpr>`: `find / -wholename "*tools/gpr" 2> /dev/null`
-# 5. `<target-pat>` must have `write:packages` scope
-# 6. This assumes that the target org's repo name is the same as the source.
+# 3. `<source-pat>` must have `read:packages` scope
+# 4. gpr installed: `dotnet tool install gpr -g` (https://github.com/jcansdale/gpr)
+# 5. Can use this to find GPR path for `<path-to-gpr>`: `find / -wholename "*tools/gpr" 2> /dev/null`
+# 6. `<target-pat>` must have `write:packages` scope
+# 7. This assumes that the target org's repo name is the same as the source.
 # 
 # Passing `gpr` as a parameter explicitly because sometimes `gpr` is aliased to `git pull --rebase` and that's not what we want here
 #
 
-if [ -z "$5" ]; then
-    echo "Usage: $0 <source-org> <source-host> <target-org> <target-pat> <path-to-gpr>"
+if [ -z "$6" ]; then
+    echo "Usage: $0 <source-org> <source-host> <souce-pat> <target-org> <target-pat> <path-to-gpr>"
     exit 1
 fi
 
@@ -23,11 +24,12 @@ echo "..."
 
 SOURCE_ORG=$1
 SOURCE_HOST=$2
-TARGET_ORG=$3
-TARGET_PAT=$4 
-GPR_PATH=$5
+SOURCE_PAT=$3
+TARGET_ORG=$4
+TARGET_PAT=$5 
+GPR_PATH=$6
 
-packages=$(GH_HOST="$SOURCE_HOST" gh api "/orgs/$SOURCE_ORG/packages?package_type=nuget" -q '.[] | .name + " " + .repository.name') 
+packages=$(GH_HOST="$SOURCE_HOST" gh api "/orgs/$SOURCE_ORG/packages?package_type=nuget" -q '.[] | .name + " " + .repository.name')
 
 echo "$packages" | while IFS= read -r response; do
 
@@ -40,36 +42,10 @@ echo "$packages" | while IFS= read -r response; do
   for version in $versions
   do
     echo "$version"
-    url=$(GH_HOST="$SOURCE_HOST" gh api graphql -f owner="$SOURCE_ORG" -f repo="$repoName" -f packageName="$packageName" -f packageVersion="$version" -f query='
-    query ($owner: String!, $repo: String!, $packageName: [String!], $packageVersion: String!) {
-      repository(owner: $owner, name: $repo) {
-        packages(first: 100, packageType: NUGET, names: $packageName) {
-          edges {
-            node {
-              id
-              name
-              packageType
-              version(version: $packageVersion) {
-                id
-                version
-                files(first: 10) {
-                  nodes {
-                    name
-                    updatedAt
-                    size
-                    url
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }' -q '.data.repository.packages.edges[].node.version.files.nodes[].url')
-
+    url="https://nuget.pkg.$SOURCE_HOST/$SOURCE_ORG/download/$packageName/$version/$packageName.$version.nupkg"
     echo $url
+    curl -Ls -H "Authorization: token $SOURCE_PAT" $url --output "${packageName}_${version}.nupkg" -s
 
-    curl $url --output "${packageName}_${version}.nupkg" -s
     # must do this otherwise there is errors (multiple of each file)
     zip -d "${packageName}_${version}.nupkg" "_rels/.rels" "\[Content_Types\].xml" # there seemed to be duplicate of these files in the nupkg that led to errors in gpr
     eval $GPR_PATH push ./"${packageName}_${version}.nupkg" --repository https://github.com/$TARGET_ORG/$repoName -k $TARGET_PAT
@@ -79,4 +55,4 @@ echo "$packages" | while IFS= read -r response; do
 
 done
 
-echo "Run this to clean up your working dir: rm *.nupkg *.zip"
+echo "Run this to clean up your working dir: rm ./*.nupkg ./*.zip"
