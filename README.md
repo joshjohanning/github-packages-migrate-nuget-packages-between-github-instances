@@ -30,6 +30,9 @@ Notes:
 ## Example
 
 ```bash
+export GH_SOURCE_PAT=ghp_abc
+export GH_TARGET_PAT=ghp_xyz
+
 ./migrate-nuget-packages-between-orgs.sh \
   joshjohanning-org-packages \
   github.com \
