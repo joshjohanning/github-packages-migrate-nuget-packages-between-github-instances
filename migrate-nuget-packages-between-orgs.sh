@@ -7,16 +7,16 @@
 # 1. gh cli installed and logged in (`gh auth login`)
 # 2. Auth to read packages with gh, ie: `gh auth refresh -h github.com -s read:packages`
 # 3. `<source-pat>` must have `read:packages` scope
-# 4. gpr installed: `dotnet tool install gpr -g` (https://github.com/jcansdale/gpr)
-# 5. Can use this to find GPR path for `<path-to-gpr>`: `find / -wholename "*tools/gpr" 2> /dev/null`
-# 6. `<target-pat>` must have `write:packages` scope
-# 7. This assumes that the target org's repo name is the same as the source.
+# 4. `<target-pat>` must have `write:packages` scope
+# 5. This assumes that the target org's repo name is the same as the source.
 # 
-# Passing `gpr` as a parameter explicitly because sometimes `gpr` is aliased to `git pull --rebase` and that's not what we want here
+# This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./temp/tools` directory.
 #
 
-if [ -z "$6" ]; then
-    echo "Usage: $0 <source-org> <source-host> <souce-pat> <target-org> <target-pat> <path-to-gpr>"
+set -e
+
+if [ $# -ne "5" ]; then
+    echo "Usage: $0 <source-org> <source-host> <souce-pat> <target-org> <target-pat>"
     exit 1
 fi
 
@@ -26,8 +26,26 @@ SOURCE_ORG=$1
 SOURCE_HOST=$2
 SOURCE_PAT=$3
 TARGET_ORG=$4
-TARGET_PAT=$5 
-GPR_PATH=$6
+TARGET_PAT=$5
+
+# create temp dir
+mkdir -p ./temp
+cd ./temp
+temp_dir=$(pwd)
+GPR_PATH="$temp_dir/tool/gpr"
+
+# check if dotnet is installed
+if ! command -v dotnet &> /dev/null
+then
+    echo "Error: dotnet could not be found"
+    exit
+fi
+
+# install gpr locally
+if [ ! -f "$GPR_PATH" ]; then
+  echo "Installing gpr locally to $GPR_PATH"
+  dotnet tool install gpr --tool-path ./tool
+fi
 
 packages=$(GH_HOST="$SOURCE_HOST" gh api "/orgs/$SOURCE_ORG/packages?package_type=nuget" -q '.[] | .name + " " + .repository.name')
 
@@ -55,4 +73,4 @@ echo "$packages" | while IFS= read -r response; do
 
 done
 
-echo "Run this to clean up your working dir: rm ./*.nupkg ./*.zip"
+echo "Run this to clean up your working dir: rm -rf ./temp"
