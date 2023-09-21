@@ -72,11 +72,11 @@ echo "$packages" | while IFS= read -r response; do
     echo "$version"
     url="https://nuget.pkg.$SOURCE_HOST/$SOURCE_ORG/download/$packageName/$version/$packageName.$version.nupkg"
     echo $url
-    curl -Ls -H "Authorization: token $SOURCE_PAT" $url --output "${packageName}_${version}.nupkg" -s
+    curl -Ls -H "Authorization: token $GH_SOURCE_PAT" $url --output "${packageName}_${version}.nupkg" -s
 
     # must do this otherwise there is errors (multiple of each file)
     zip -d "${packageName}_${version}.nupkg" "_rels/.rels" "\[Content_Types\].xml" # there seemed to be duplicate of these files in the nupkg that led to errors in gpr
-    eval $GPR_PATH push ./"${packageName}_${version}.nupkg" --repository https://github.com/$TARGET_ORG/$repoName -k $TARGET_PAT
+    eval $GPR_PATH push ./"${packageName}_${version}.nupkg" --repository https://github.com/$TARGET_ORG/$repoName -k $GH_TARGET_PAT
   done
 
   echo "..."
