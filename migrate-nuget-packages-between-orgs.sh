@@ -4,11 +4,13 @@
 #
 #
 # Prereqs:
-# 1. Set the source GitHub PAT env var: export GH_SOURCE_PAT=ghp_abc (must have at least `read:packages`, `read:org` scope)
-# 2. Set the target GitHub PAT env var: export GH_TARGET_PAT=ghp_abc (must have at least `write:packages`, `read:org` scope)
-# 3. This assumes that the target org's repo name is the same as the source.
-# 
-# This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./temp/tools` directory.
+# 1. [gh cli](https://cli.github.com) installed
+# 2. Set the source GitHub PAT env var: `export GH_SOURCE_PAT=ghp_abc` (must have at least `read:packages`, `read:org` scope)
+# 3. Set the target GitHub PAT env var: `export GH_TARGET_PAT=ghp_xyz` (must have at least `write:packages`, `read:org` scope)
+#
+# Notes:
+# - This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./temp/tools` directory
+# - This script assumes that the target org's repo name is the same as the source (the target repo doesn't _need_ to exist, the package just won't be mapped to a repo)
 #
 
 set -e

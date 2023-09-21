@@ -6,23 +6,22 @@ This should be able to migrate packages from GitHub Enterprise Server to GitHub.
 
 ## Prerequisites
 
-1. [gh cli](https://cli.github.com) installed and logged in to be able to access the source GitHub instance (`gh auth login`)
-2. Auth to read packages from the source GitHub instance with `gh`, ie: `gh auth refresh -h github.com -s read:packages` (update `-h` with source github host)
-3. `<source-pat>` must have `read:packages` scope
-4. `<target-pat>` must have `write:packages` scope
-5. This assumes that the target org's repo name is the same as the source.
+1. [gh cli](https://cli.github.com) installed
+2. Set the source GitHub PAT env var: `export GH_SOURCE_PAT=ghp_abc` (must have at least `read:packages`, `read:org` scope)
+3. Set the target GitHub PAT env var: `export GH_TARGET_PAT=ghp_xyz` (must have at least `write:packages`, `read:org` scope)
 
-This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./temp/tools` directory.
+Notes:
+
+- This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./temp/tools` directory
+- This script assumes that the target org's repo name is the same as the source (the target repo doesn't _need_ to exist, the package just won't be mapped to a repo)
 
 ## Usage
 
 ```bash
 ./migrate-nuget-packages-between-orgs.sh \
-  <source-org> 
+  <source-org> \
   <source-host> \
-  <source-pat> \
-  <target-org> \
-  <target-pat>
+  <target-org>
 ```
 
 ## Example
@@ -31,9 +30,7 @@ This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./t
 ./migrate-nuget-packages-between-orgs.sh \
   joshjohanning-org-packages \
   github.com \
-  ghp_abc \
-  joshjohanning-org-packages-migrated \
-  ghp_xyz
+  joshjohanning-org-packages-migrated
 ```
 
 <details>
