@@ -1,22 +1,20 @@
 #!/bin/bash
 
-# Usage: ./migrate-nuget-packages-between-orgs.sh <source-org> <source-host> <target-org> <target-pat> <path-to-gpr>
+# Usage: ./migrate-nuget-packages-between-orgs.sh <source-org> <source-host> <target-org>
 #
 #
 # Prereqs:
-# 1. gh cli installed and logged in (`gh auth login`)
-# 2. Auth to read packages with gh, ie: `gh auth refresh -h github.com -s read:packages`
-# 3. `<source-pat>` must have `read:packages` scope
-# 4. `<target-pat>` must have `write:packages` scope
-# 5. This assumes that the target org's repo name is the same as the source.
+# 1. Set the source GitHub PAT env var: export GH_SOURCE_PAT=ghp_abc (must have at least `read:packages`, `read:org` scope)
+# 2. Set the target GitHub PAT env var: export GH_TARGET_PAT=ghp_abc (must have at least `write:packages`, `read:org` scope)
+# 3. This assumes that the target org's repo name is the same as the source.
 # 
 # This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./temp/tools` directory.
 #
 
 set -e
 
-if [ $# -ne "5" ]; then
-    echo "Usage: $0 <source-org> <source-host> <souce-pat> <target-org> <target-pat>"
+if [ $# -ne "3" ]; then
+    echo "Usage: $0 <source-org> <source-host> <target-org>"
     exit 1
 fi
 
@@ -24,9 +22,19 @@ echo "..."
 
 SOURCE_ORG=$1
 SOURCE_HOST=$2
-SOURCE_PAT=$3
-TARGET_ORG=$4
-TARGET_PAT=$5
+TARGET_ORG=$3
+
+# make sure env variables are defined
+if [ -z "$GH_SOURCE_PAT" ]; then
+    echo "Error: set GH_SOURCE_PAT env var"
+    exit 1
+fi
+
+if [ -z "$GH_TARGET_PAT" ]; then
+    echo "Error: set GH_TARGET_PAT env var"
+    exit 1
+fi
+
 
 # create temp dir
 mkdir -p ./temp
