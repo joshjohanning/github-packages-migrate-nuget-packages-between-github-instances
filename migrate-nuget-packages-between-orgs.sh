@@ -1,22 +1,22 @@
 #!/bin/bash
 
-# Usage: ./migrate-nuget-packages-between-orgs.sh <source-org> <source-host> <target-org> <target-pat> <path-to-gpr>
+# Usage: ./migrate-nuget-packages-between-orgs.sh <source-org> <source-host> <target-org>
 #
 #
 # Prereqs:
-# 1. gh cli installed and logged in (`gh auth login`)
-# 2. Auth to read packages with gh, ie: `gh auth refresh -h github.com -s read:packages`
-# 3. `<source-pat>` must have `read:packages` scope
-# 4. `<target-pat>` must have `write:packages` scope
-# 5. This assumes that the target org's repo name is the same as the source.
-# 
-# This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./temp/tools` directory.
+# 1. [gh cli](https://cli.github.com) installed
+# 2. Set the source GitHub PAT env var: `export GH_SOURCE_PAT=ghp_abc` (must have at least `read:packages`, `read:org` scope)
+# 3. Set the target GitHub PAT env var: `export GH_TARGET_PAT=ghp_xyz` (must have at least `write:packages`, `read:org` scope)
+#
+# Notes:
+# - This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./temp/tools` directory
+# - This script assumes that the target org's repo name is the same as the source (the target repo doesn't _need_ to exist, the package just won't be mapped to a repo)
 #
 
 set -e
 
-if [ $# -ne "5" ]; then
-    echo "Usage: $0 <source-org> <source-host> <souce-pat> <target-org> <target-pat>"
+if [ $# -ne "3" ]; then
+    echo "Usage: $0 <source-org> <source-host> <target-org>"
     exit 1
 fi
 
@@ -24,9 +24,21 @@ echo "..."
 
 SOURCE_ORG=$1
 SOURCE_HOST=$2
-SOURCE_PAT=$3
-TARGET_ORG=$4
-TARGET_PAT=$5
+TARGET_ORG=$3
+
+# make sure env variables are defined
+if [ -z "$GH_SOURCE_PAT" ]; then
+    echo "Error: set GH_SOURCE_PAT env var"
+    exit 1
+fi
+
+if [ -z "$GH_TARGET_PAT" ]; then
+    echo "Error: set GH_TARGET_PAT env var"
+    exit 1
+fi
+
+# log in to gh cli with source pat
+export GH_TOKEN=$GH_SOURCE_PAT
 
 # create temp dir
 mkdir -p ./temp
@@ -62,11 +74,11 @@ echo "$packages" | while IFS= read -r response; do
     echo "$version"
     url="https://nuget.pkg.$SOURCE_HOST/$SOURCE_ORG/download/$packageName/$version/$packageName.$version.nupkg"
     echo $url
-    curl -Ls -H "Authorization: token $SOURCE_PAT" $url --output "${packageName}_${version}.nupkg" -s
+    curl -Ls -H "Authorization: token $GH_SOURCE_PAT" $url --output "${packageName}_${version}.nupkg" -s
 
     # must do this otherwise there is errors (multiple of each file)
     zip -d "${packageName}_${version}.nupkg" "_rels/.rels" "\[Content_Types\].xml" # there seemed to be duplicate of these files in the nupkg that led to errors in gpr
-    eval $GPR_PATH push ./"${packageName}_${version}.nupkg" --repository https://github.com/$TARGET_ORG/$repoName -k $TARGET_PAT
+    eval $GPR_PATH push ./"${packageName}_${version}.nupkg" --repository https://github.com/$TARGET_ORG/$repoName -k $GH_TARGET_PAT
   done
 
   echo "..."
