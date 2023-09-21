@@ -34,6 +34,13 @@ cd ./temp
 temp_dir=$(pwd)
 GPR_PATH="$temp_dir/tool/gpr"
 
+# check if dotnet is installed
+if ! command -v dotnet &> /dev/null
+then
+    echo "Error: dotnet could not be found"
+    exit
+fi
+
 # install gpr locally
 if [ ! -f "$GPR_PATH" ]; then
   echo "Installing gpr locally to $GPR_PATH"
