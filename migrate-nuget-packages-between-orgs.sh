@@ -35,6 +35,8 @@ if [ -z "$GH_TARGET_PAT" ]; then
     exit 1
 fi
 
+# log in to gh cli with source pat
+export GH_TOKEN=$GH_SOURCE_PAT
 
 # create temp dir
 mkdir -p ./temp
