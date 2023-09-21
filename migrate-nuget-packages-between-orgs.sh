@@ -29,6 +29,13 @@ TARGET_ORG=$4
 TARGET_PAT=$5 
 GPR_PATH=$6
 
+# check if GPR_PATH is valid
+if [ ! -f "$GPR_PATH" ]; then
+    echo "Error: $GPR_PATH does not exist"
+    echo "Install gpr with: dotnet tool install gpr -g"
+    exit 1
+fi
+
 packages=$(GH_HOST="$SOURCE_HOST" gh api "/orgs/$SOURCE_ORG/packages?package_type=nuget" -q '.[] | .name + " " + .repository.name')
 
 echo "$packages" | while IFS= read -r response; do
