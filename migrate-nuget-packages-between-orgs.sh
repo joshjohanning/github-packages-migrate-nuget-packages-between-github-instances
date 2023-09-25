@@ -10,7 +10,8 @@
 #
 # Notes:
 # - This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./temp/tools` directory
-# - This script assumes that the target org's repo name is the same as the source (the target repo doesn't _need_ to exist, the package just won't be mapped to a repo)
+# - This script assumes that the target org's repo name is the same as the source
+# - If the repo doesn't exist, the package will still import but won't be mapped to a repo
 #
 
 set -e
@@ -37,9 +38,6 @@ if [ -z "$GH_TARGET_PAT" ]; then
     exit 1
 fi
 
-# log in to gh cli with source pat
-export GH_TOKEN=$GH_SOURCE_PAT
-
 # create temp dir
 mkdir -p ./temp
 cd ./temp
@@ -59,7 +57,7 @@ if [ ! -f "$GPR_PATH" ]; then
   dotnet tool install gpr --tool-path ./tool
 fi
 
-packages=$(GH_HOST="$SOURCE_HOST" gh api "/orgs/$SOURCE_ORG/packages?package_type=nuget" -q '.[] | .name + " " + .repository.name')
+packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/orgs/$SOURCE_ORG/packages?package_type=nuget" -q '.[] | .name + " " + .repository.name')
 
 echo "$packages" | while IFS= read -r response; do
 
@@ -68,7 +66,7 @@ echo "$packages" | while IFS= read -r response; do
 
   echo "$repoName --> $packageName"
   
-  versions=$(GH_HOST="$SOURCE_HOST" gh api "/orgs/$SOURCE_ORG/packages/nuget/$packageName/versions" -q '.[] | .name')
+  versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/orgs/$SOURCE_ORG/packages/nuget/$packageName/versions" -q '.[] | .name')
   for version in $versions
   do
     echo "$version"

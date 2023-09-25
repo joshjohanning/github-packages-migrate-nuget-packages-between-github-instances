@@ -16,7 +16,8 @@ This should be able to migrate packages from GitHub Enterprise Server to GitHub.
 Notes:
 
 - This script installs [gpr](https://github.com/jcansdale/gpr) locally to the `./temp/tools` directory
-- This script assumes that the target org's repo name is the same as the source (the target repo doesn't _need_ to exist, the package just won't be mapped to a repo)
+- This script assumes that the target org's repo name is the same as the source
+- If the repo doesn't exist, the package will still import but won't be mapped to a repo
 
 ## Usage
 
