@@ -57,7 +57,7 @@ if [ ! -f "$GPR_PATH" ]; then
   dotnet tool install gpr --tool-path ./tool
 fi
 
-packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/orgs/$SOURCE_ORG/packages?package_type=nuget" -q '.[] | .name + " " + .repository.name')
+packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/orgs/$SOURCE_ORG/packages?package_type=nuget" --paginate -q '.[] | .name + " " + .repository.name')
 
 echo "$packages" | while IFS= read -r response; do
 
@@ -66,7 +66,7 @@ echo "$packages" | while IFS= read -r response; do
 
   echo "$repoName --> $packageName"
   
-  versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/orgs/$SOURCE_ORG/packages/nuget/$packageName/versions" -q '.[] | .name')
+  versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/orgs/$SOURCE_ORG/packages/nuget/$packageName/versions" --paginate -q '.[] | .name')
   for version in $versions
   do
     echo "$version"
