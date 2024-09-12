@@ -17,8 +17,8 @@
 set -e
 
 if [ $# -ne "3" ]; then
-    echo "Usage: $0 <source-org> <source-host> <target-org>"
-    exit 1
+  echo "Usage: $0 <source-org> <source-host> <target-org>"
+  exit 1
 fi
 
 echo "..."
@@ -29,13 +29,13 @@ TARGET_ORG=$3
 
 # make sure env variables are defined
 if [ -z "$GH_SOURCE_PAT" ]; then
-    echo "Error: set GH_SOURCE_PAT env var"
-    exit 1
+  echo "Error: set GH_SOURCE_PAT env var"
+  exit 1
 fi
 
 if [ -z "$GH_TARGET_PAT" ]; then
-    echo "Error: set GH_TARGET_PAT env var"
-    exit 1
+  echo "Error: set GH_TARGET_PAT env var"
+  exit 1
 fi
 
 # create temp dir
@@ -45,16 +45,15 @@ temp_dir=$(pwd)
 GPR_PATH="$temp_dir/tool/gpr"
 
 # check if dotnet is installed
-if ! command -v dotnet &> /dev/null
-then
-    echo "Error: dotnet could not be found"
-    exit
+if ! command -v dotnet &>/dev/null; then
+  echo "Error: dotnet could not be found"
+  exit
 fi
 
 # install gpr locally
 if [ ! -f "$GPR_PATH" ]; then
   echo "Installing gpr locally to $GPR_PATH"
-  dotnet tool install gpr --tool-path ./tool
+  dotnet tool install gpr --add-source https://api.nuget.org/v3/index.json --tool-path ./tool
 fi
 
 packages=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/orgs/$SOURCE_ORG/packages?package_type=nuget" --paginate -q '.[] | .name + " " + .repository.name')
@@ -65,10 +64,13 @@ echo "$packages" | while IFS= read -r response; do
   repoName=$(echo "$response" | cut -d ' ' -f 2)
 
   echo "$repoName --> $packageName"
-  
+
   versions=$(GH_HOST="$SOURCE_HOST" GH_TOKEN=$GH_SOURCE_PAT gh api "/orgs/$SOURCE_ORG/packages/nuget/$packageName/versions" --paginate -q '.[] | .name')
-  for version in $versions
-  do
+  versionArray=($versions)
+
+  # Reverse the array
+  for ((i = ${#versionArray[@]} - 1; i >= 0; i--)); do
+    version="${versionArray[$i]}"
     echo "$version"
     url="https://nuget.pkg.$SOURCE_HOST/$SOURCE_ORG/download/$packageName/$version/$packageName.$version.nupkg"
     echo $url
